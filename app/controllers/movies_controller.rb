@@ -7,7 +7,20 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    id = params["sorted"]
+    # logger.info "---" + id + "---\n" unless id == nil
+
+    if params["highlight"] == "title_header" 
+      @highlight_title = 'hilite' 
+      @highlight_release_date = '' 
+      @movies = Movie.find(:all, :order => "title")
+    elsif params["highlight"] == "release_date_header"
+      @highlight_title = ''
+      @highlight_release_date = 'hilite' 
+      @movies = Movie.find(:all, :order => "release_date")
+    else
+      @movies = Movie.all
+    end
   end
 
   def new
