@@ -7,51 +7,39 @@ class MoviesController < ApplicationController
   end
 
   def index
-    id = params["sorted"]
-    # logger.info "---" + id + "---\n" unless id == nil
-
     @all_ratings = Movie.get_ratings
-    @user_selected_ratings = params["ratings"]
-    puts @user_selected_ratings
     
-    if @user_selected_ratings != nil
-      @movies = Movie.find(:all, :order => "title", :conditions => ["rating IN (?)", @user_selected_ratings.keys])
-      flash[:user_selected_ratings] = @user_selected_ratings
-    else
-      @user_selected_ratings = flash[:user_selected_ratings]
-      if @user_selected_ratings == nil
-        @user_selected_ratings = Hash.new
-        @all_ratings.each { |rating| @user_selected_ratings[rating] = 1 }
-      else
-        flash[:user_selected_ratings] = @user_selected_ratings
-      end
-      
-      puts @user_selected_ratings
+    ratings = Hash.new
+    @all_ratings.each { |rating| ratings[rating] = 1 }
+    highlight = nil
 
-      if params["highlight"] == "title_header" 
-        @highlight_title = 'hilite' 
-        @highlight_release_date = '' 
- 
-#        if @user_selected_ratings == nil
-#          @movies = Movie.find(:all, :order => "title")
-#        else
-          @movies = Movie.find(:all, :order => "title", :conditions => ["rating IN (?)", @user_selected_ratings.keys])
-#        end
-      elsif params["highlight"] == "release_date_header"
-        @highlight_title = ''
-        @highlight_release_date = 'hilite' 
-#        if @user_selected_ratings == nil
-#          @movies = Movie.find(:all, :order => "release_date")
-#        else
-          @movies = Movie.find(:all, :order => "release_date", :conditions => ["rating IN (?)", @user_selected_ratings.keys])
-#        end
-      else
-#        if @user_selected_ratings == nil
-#          @movies = Movie.find(:all)
-#        else
-          @movies = Movie.find(:all, :conditions => ["rating IN (?)", @user_selected_ratings.keys])
-#        end
-      end
+    if params["ratings"] != nil
+      ratings = params["ratings"]
+    elsif session[:ratings] != nil
+      ratings = session[:ratings]
+    end
+    session[:ratings] = ratings
+
+    if params["highlight"] != nil
+      highlight = params["highlight"]
+    elsif session[:highlight] != nil
+      highlight = session[:highlight]
+    end
+    session[:highlight] = highlight
+
+    if highlight != nil
+      @movies = Movie.find(:all, :order => highlight, :conditions => ["rating IN (?)", ratings.keys])
+    else
+      @movies = Movie.find(:all, :conditions => ["rating IN (?)", ratings.keys])
+    end
+    
+    @user_selected_ratings = ratings
+    if highlight == "title"
+      @highlight_title = "hilite"
+      @highlight_release_date = ""
+    elsif highlight == "release_date"  
+      @highlight_title = ""
+      @highlight_release_date = "hilite"
     end
   end
 
