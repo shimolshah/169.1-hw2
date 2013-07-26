@@ -17,6 +17,8 @@ class MoviesController < ApplicationController
       ratings = params["ratings"]
     elsif session[:ratings] != nil
       ratings = session[:ratings]
+      redirect_to movies_path params.merge({"ratings" => ratings})
+      return
     end
     session[:ratings] = ratings
 
@@ -24,6 +26,8 @@ class MoviesController < ApplicationController
       highlight = params["highlight"]
     elsif session[:highlight] != nil
       highlight = session[:highlight]
+      redirect_to movies_path params.merge({"highlight" => highlight})
+      return
     end
     session[:highlight] = highlight
 
